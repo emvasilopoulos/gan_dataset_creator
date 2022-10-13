@@ -151,10 +151,10 @@ class SeriesHandler:
 
 
 if __name__ == '__main__':
-    series_directory = 'E:/Projects/Animation Alternatives/Raw Data/Batman The Animated Series - Full HD/Version 1'
+    series_directory = '../Raw Data/Batman The Animated Series - Full HD/Version 1'
     series_name = 'batman_T.A.S._v1'
     series_handler = SeriesHandler(series_directory, series_name)
 
-    extraction_directory = f'E:/Projects/Animation Alternatives/{series_name}/original_images'
+    extraction_directory = f'../{series_name}/original_images'
     end_of_intro = 76  # seconds
     series_handler.extract_images(extraction_directory, end_of_intro, starting_episode=1)
