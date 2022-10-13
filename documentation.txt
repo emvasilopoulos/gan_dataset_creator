@@ -1,0 +1,10 @@
+- All data will be read with opencv (cv2).
+- Images with opencv are represented as numpy arrays with dims (height_size, widht_size, number_of_channels)
+- How to use this tool:
+1) Create as many editor.Component objects you want. Each object reflects one effect applied to the input image
+2) Create on Editor object. Its constructor need a list of editor.Component objects
+3) Create a SeriesHandler object that needs as input:
+    a. Directory of series that contains all episodes (video files), that will be processed and saved as individual frames
+    b. Directory of frames, where they will be stored
+    c. Editor object (optional). If an Editor object is not declared, the images will be saved as is.
+

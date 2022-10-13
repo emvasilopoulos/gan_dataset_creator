@@ -1,0 +1,65 @@
+Context --> The purpose of this project is to create datasets consisted of images in a proper state, in order to be used
+for training systems such as StyleGAN2, StyleGAN3, etc.
+
+--------- Requirements ---------
+a. AFTER ALL THE PREPROCESSING, there will be more images than necessary due to the high frame rate
+I should definitely make a frame discarding system. Either by choosing the frames manually, or saving half of the images
+in a video, or something
+b. Save intro of video only once.
+
+--------- QUESTIONS ---------
+1) How should I organize the project?
+
+2) How should I organize the output of a script? (output = A dataset)
+
+3) How should I ogranize the input? Videos in HD, low resolution etc.
+
+---------  ANSWERS  ---------
+1) Organize per model and its requirements
+
+2) The output of preprocess is a dataset for a model. Thus we need a package that covers the needs of the models
+
+3) What kind of data do I have? Images and Videos
+The videos might need some cropping ==> Cropping should be a standard process into the developed methods with a default
+value of 0% cropping.
+The videos will be converted to images
+All images if low resolution should be furtherly preprocessed into a higher resolution
+This raises a new question. What are the thresholds for "super-resolving"?
+
+
+---------- Project SCHEMA ----------
+
+__
+  |__ generative_method
+  |__ input_handler --> Types of input (AVI, MP4, JPEG?)
+  |__ experimentation --> scripts that apply a process on an image and save it for further inspection
+
+---------- Dataset SCHEMA ----------
+
+--
+  |__ stylegan2 __
+  |               |__ 1. original size - low resolution
+  |                                |__ name of video 1__
+  |                                |__ name of video 2__
+  ...                                       ...
+  |               |__ 2. super resolution
+  |                                |__ name of video 1__
+  |                                |__ name of video 2__
+  ...                                       ...
+  |               |__ 3. cropped __
+  |                                |__ name of video 1__
+  |                                |__ name of video 2__
+  ...                                       ...
+  |               |__ 4. resized __
+  |                                |__ name of video 1__
+  |                                |__ name of video 2__
+  |               |__ ready_1024
+  |                                |__ name of video 1__
+  |                                |__ name of video 2__
+  ...                                       ...
+  |               |__ ready_512
+  |                                |__ name of video 1__
+  |                                |__ name of video 2__
+  ...                                       ...
+  |
+  |__ stylegan3
