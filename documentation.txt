@@ -7,4 +7,5 @@
     a. Directory of series that contains all episodes (video files), that will be processed and saved as individual frames
     b. Directory of frames, where they will be stored
     c. Editor object (optional). If an Editor object is not declared, the images will be saved as is.
-
+4) After finishing extracting images from video files, run manually_discard_images.py. This script is a tool to keep
+a copy of the images of interest on a separate folder, using only the keys "A" (ignore), "D" (keep copy)

@@ -6,6 +6,11 @@ a. AFTER ALL THE PREPROCESSING, there will be more images than necessary due to 
 I should definitely make a frame discarding system. Either by choosing the frames manually, or saving half of the images
 in a video, or something
 b. Save intro of video only once.
+# Update Regarding b. --> Intros and outros occur in unpredictable times. A simple solution is to discard big time
+# intervals when the intro will possibly take 'place'. For example in Justice League 2001 2004 the minutes 1 to 4 are ignored.
+c. Create a manual discarder of images unsuitable for training
+d. create main.py arguments. Support input for multiple Components as arguments, series directory, save path, etc.
+
 
 --------- QUESTIONS ---------
 1) How should I organize the project?
