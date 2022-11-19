@@ -2,6 +2,7 @@ editor/components/super_resolution/waifu2x/models/
 editor/components/super_resolution/diffusion_posterior_sampling/models/
 editor/components/super_resolution/diffusion_posterior_sampling/figures/
 editor/components/super_resolution_srdiff_diffusion/checkpoints/
+editor/components/super_resolution_waifu2x/model_check_points/
 editor/components/super_resolution_waifu2x/output_examples/
 editor/components/super_resolution_waifu2x/docs/CARN/carn_plot_loss_files/
 google_drive_uploader/client_secret_*.json
