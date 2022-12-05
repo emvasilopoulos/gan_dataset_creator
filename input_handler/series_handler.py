@@ -1,35 +1,18 @@
 import os
-
 import cv2
-import ffmpeg
+
+from input_handler.inputhandler import InputHandler
 
 
-class SeriesHandler:
-    unacceptable_chars = ['\\', '/', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '[', ']', '{', '}', ',', '?',
-                          ';', ':', '<', '>', '|', '~']
-    allowed_special_chars = ['-', '_', '.']
-
+class SeriesHandler(InputHandler):
+    acceptable_formats = ['mp4', 'avi', 'mkv']
     image_counter = 0
 
     def __init__(self, series_directory: str, series_name: str, editor=None) -> None:
-        print('- Listing episodes...')
-        self.episodes = [x for x in os.listdir(series_directory) if self.is_video_format(x)]  # Works fine
-        self.episodes_paths = [f'{series_directory}/{episode}' for episode in self.episodes]
-        self.last_episode = len(self.episodes) - 1
+        super().__init__(series_directory, series_name, editor)
 
-        # This name will be used in extracted images
-        is_ok = self.check_series_name(series_name)
-        if is_ok:
-            self.series_name = series_name
-        else:
-            raise Exception(
-                "The following characters are not allowed for a series_name: " + str(self.unacceptable_chars)
-                + "\nUse only " + str(self.allowed_special_chars))
+        self.last_episode = len(self.acceptable_files) - 1
 
-        self.editor = editor
-        if self.editor is not None:
-            for tool in self.editor.components:
-                self.series_name += f'_{tool.get_component_name()}'
         # To save hard disk allocation, MKV files will be converted to MP4 when extracting frames and then will delete
         # the generated MP4
 
@@ -51,7 +34,7 @@ class SeriesHandler:
         os.makedirs(save_dir, exist_ok=True)
 
         # 2 - Scan over episodes of series
-        for i, (episode, episode_path) in enumerate(zip(self.episodes, self.episodes_paths)):
+        for i, (episode, episode_path) in enumerate(zip(self.acceptable_files, self.acceptable_files_paths)):
             # Skip episodes
             if i < starting_episode:
                 continue
@@ -151,7 +134,7 @@ class SeriesHandler:
         os.makedirs(save_dir, exist_ok=True)
 
         # 2 - Scan over episodes of series
-        for i, (episode, episode_path) in enumerate(zip(self.episodes, self.episodes_paths)):
+        for i, (episode, episode_path) in enumerate(zip(self.acceptable_files, self.acceptable_files_paths)):
             # Skip episodes
             if i < starting_episode:
                 continue
@@ -241,21 +224,6 @@ class SeriesHandler:
             if i >= ending_episode:
                 print(f'This was the last episode of the series: {self.series_name}...')
                 break
-
-    # TODO - Add all the formats missing
-    def is_video_format(self, filename: str):
-        video_formats = ['mp4', 'avi', 'mkv']
-        for video_format in video_formats:
-            if filename.endswith(video_format):
-                return True
-        return False
-
-    def check_series_name(self, series_name: str):
-        for char in series_name:
-            for unacceptable_char in self.unacceptable_chars:
-                if char == unacceptable_char:
-                    return False
-        return True
 
     def convert_to_mp4(self, mkv_file: str, temp_directory: str):
         # name, ext = os.path.splitext(mkv_file)  # From: "C:/path/t.txt" --> To: ('C:/path/t', '.txt')
