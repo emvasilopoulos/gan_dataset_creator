@@ -5,6 +5,10 @@ import time
 import zipfile
 import shutil
 
+import cv2
+
+from editor.components.place_in_frame import InFramePlacer
+from editor.editor import Editor
 from input_handler.inputhandler import InputHandler
 
 
@@ -42,6 +46,10 @@ class ComicHandler(InputHandler):
         for filename in self.acceptable_files:
             print(f'Making archive file of {filename}')
             new_filename, new_file_path = self.comic_file_to_archive(filename)
+            if new_filename is None:
+                continue
+            if new_file_path is None:
+                continue
 
             if new_filename.endswith('rar'):
                 extracted_files_directory = self.extract_from_rar(self.series_directory, new_file_path)
@@ -135,23 +143,33 @@ class ComicHandler(InputHandler):
 
         for i in range(start_idx, end_idx):
             image = extracted_images[i]
-            shutil.move(
-                src=f'{extracted_files_directory}/{image}',
-                dst=f'{directory}/{self.series_name}/{subdir}/{self.series_name}_{subdir}_{starting_counter}.jpg'
-            )
+            if self.editor is not None:
+                edit_names = ''
+                img = cv2.imread(f'{extracted_files_directory}/{image}')
+                edit_names, frame = self.editor.edit_frame(img)
+                cv2.imwrite(
+                    f'{directory}/{self.series_name}/{subdir}/{self.series_name}_{subdir}_{edit_names}_{starting_counter}.jpg',
+                    frame
+                )
+            else:
+                shutil.move(
+                    src=f'{extracted_files_directory}/{image}',
+                    dst=f'{directory}/{self.series_name}/{subdir}/{self.series_name}_{subdir}_{starting_counter}.jpg'
+                )
             starting_counter += 1
         return starting_counter
 
-    def comic_file_to_archive(self, filename):
+    def comic_file_to_archive(self, filename: str):
 
-        if filename.endswith('cbr'):
+        if filename.lower().endswith('cbr'):
             new_filename = 'temp.rar'
-        elif filename.endswith('cbt'):
+        elif filename.lower().endswith('cbt'):
             new_filename = 'temp.tar'
-        elif filename.endswith('cbz'):
+        elif filename.lower().endswith('cbz'):
             new_filename = 'temp.zip'
         else:
-            raise Exception(f'Unknown format of file: "{filename}"')
+            print(f'Unknown format of file: "{filename}"')
+            return None, None
 
         new_file_path = f'{self.series_directory}/{new_filename}'
         shutil.copy(
@@ -190,6 +208,7 @@ class ComicHandler(InputHandler):
         alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
         return sorted(extracted_images, key=alphanum_key)
 
+
 """
 POWERSHELL COMMANDS TO UNRAR
 
@@ -208,10 +227,11 @@ Start-Process -FilePath <winrar_executable_path> -ArgumentList @("x", <rar_file_
 import subprocess
 
 if __name__ == '__main__':
-    series_directory = 'E:/Projects/Animation Alternatives/Raw Data/COMICS/Detective Comics 1937-2019/01 Detective Comics v1 001-881 - 1937-2011'
-    series_name = 'detective_comics_v1_1937_to_2011'
+    series_directory = 'E:/Projects/Animation Alternatives/Raw Data\COMICS\Batman Beyond Unlimited'
+    series_name = 'batman_beyond_unlimited'
 
-    comic_handler = ComicHandler(series_directory, series_name, editor=None)
+    editor = Editor([InFramePlacer(1024, color=(255, 255, 255))])
+    comic_handler = ComicHandler(series_directory, series_name, editor=editor)
 
     save_dir = 'E:/Projects/Animation Alternatives'
-    comic_handler.extract(save_dir, covers=1, ending_pages=3)
+    comic_handler.extract(save_dir, covers=1, ending_pages=4)
