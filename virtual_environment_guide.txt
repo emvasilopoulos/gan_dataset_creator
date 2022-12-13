@@ -1,0 +1,6 @@
+- Create a virtual environment:
+python -m venv /path/to/virtual_environment
+(In this repo the virtual environment is at './virtual_environment')
+
+- Activate environment:
+--- (Powershell) --> virtual_environment\Scripts\Activate.ps1

@@ -51,18 +51,21 @@ class ComicHandler(InputHandler):
             if new_file_path is None:
                 continue
 
+            extraction_dir = f'{self.series_directory}/temp'
             if new_filename.endswith('rar'):
-                extracted_files_directory = self.extract_from_rar(self.series_directory, new_file_path)
+                extracted_files_directory = self.extract_from_rar(extraction_dir, new_file_path)
             elif new_filename.endswith('tar'):
+                # TODO - Implement Extract from TAR
                 continue
                 raise NotImplementedError
             elif new_filename.endswith('zip'):
-                continue
-                raise NotImplementedError
+                # TODO - Implement Extract from ZIP
+                extracted_files_directory = self.extract_from_zip(extraction_dir, new_file_path)
             else:
+                print(f'Unknown archive format of file: {new_filename}. Skipping...')
                 continue
-                raise Exception(f'Unknown archive format of file: {new_filename}')
 
+            # find
             """ Sort the list of extracted images in the way that humans expect."""
             extracted_images = self.sort_as_human(os.listdir(extracted_files_directory))
 
@@ -180,19 +183,19 @@ class ComicHandler(InputHandler):
         #
         return new_filename, new_file_path
 
-    def extract_from_rar(self, directory: str, rar_file_path: str):
+    def extract_from_rar(self, extraction_directory: str, rar_file_path: str):
         # Prepare command
         comic_types = '(\'*.jpg\')'
 
-        # extracted_files_directory = f'\'\"{directory}/temp\"\''
+        #
+        extracted_files_directory = self.__check_extraction_dir(extraction_directory)
 
-        extracted_files_directory = f'{directory}/temp/'
         extracted_files_directory_quoted = f'\'\"{extracted_files_directory}\"\''
         rar_file_path_quoted = f'\'\"{rar_file_path}\"\''
         argument_list = f'@(\"e\",{rar_file_path_quoted},{comic_types},{extracted_files_directory_quoted},\"y\")'
 
         # Run Powershell command that uses winrar.
-        output = subprocess.run(
+        subprocess.run(
             [
                 'powershell',
                 '-Command',
@@ -200,8 +203,26 @@ class ComicHandler(InputHandler):
             ],
             capture_output=True
         )
-        print(output)
+
         return extracted_files_directory
+
+    def extract_from_zip(self, extraction_directory: str, zip_file_path: str):
+        extracted_files_directory = self.__check_extraction_dir(extraction_directory)
+        with zipfile.ZipFile(f'{zip_file_path}', 'r') as archive:
+            archive.extractall(extracted_files_directory)
+        self.__crawl_to_bring_to_root(extracted_files_directory)
+        return extracted_files_directory
+
+    def __check_extraction_dir(self, extraction_dir: str):
+        if extraction_dir.endswith('/'):
+            return extraction_dir
+        else:
+            return f'{extraction_dir}/'
+
+    def __crawl_to_bring_to_root(self, extraction_dir: str):
+        for root, dirs, files in os.walk(extraction_dir):
+            for name in files:
+                print(root, '|||', name)
 
     def sort_as_human(self, extracted_images):
         convert = lambda text: int(text) if text.isdigit() else text
@@ -227,11 +248,11 @@ Start-Process -FilePath <winrar_executable_path> -ArgumentList @("x", <rar_file_
 import subprocess
 
 if __name__ == '__main__':
-    series_directory = 'E:/Projects/Animation Alternatives/Raw Data\COMICS\Batman Beyond Unlimited'
-    series_name = 'batman_beyond_unlimited'
+    series_directory = 'E:/Projects/Animation Alternatives/Raw Data/COMICS/test_zip'
+    series_name = 'test_zip'
 
     editor = Editor([InFramePlacer(1024, color=(255, 255, 255))])
     comic_handler = ComicHandler(series_directory, series_name, editor=editor)
 
     save_dir = 'E:/Projects/Animation Alternatives'
-    comic_handler.extract(save_dir, covers=1, ending_pages=4)
+    comic_handler.extract(save_dir, covers=1, ending_pages=1)
